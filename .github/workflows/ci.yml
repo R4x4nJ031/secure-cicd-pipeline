@@ -143,7 +143,7 @@ jobs:
           docker run --rm \
             -v /var/run/docker.sock:/var/run/docker.sock \
             -v "${{ github.workspace }}:/workspace" \
-            anchore/syft \
+            anchore/syft:v0.104.0 \
             clean-app:${{ github.sha }} \
             -o json=/workspace/reports/sbom-clean-app.json
 
