@@ -1,0 +1,24 @@
+rules:
+  - id: javascript-eval-use
+    message: Avoid using eval(). It can execute untrusted input and lead to code injection.
+    severity: ERROR
+    languages:
+      - javascript
+    pattern: eval(...)
+    metadata:
+      category: security
+      technology:
+        - javascript
+      confidence: high
+
+  - id: javascript-new-function-use
+    message: Avoid using the Function constructor. It behaves like eval() and can introduce code injection risks.
+    severity: ERROR
+    languages:
+      - javascript
+    pattern: new Function(...)
+    metadata:
+      category: security
+      technology:
+        - javascript
+      confidence: high
