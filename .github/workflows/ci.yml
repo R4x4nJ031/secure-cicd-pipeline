@@ -155,6 +155,7 @@ jobs:
             aquasec/trivy:0.69.3 \
             image \
             --scanners vuln \
+            --ignorefile /workspace/.trivyignore \
             --severity HIGH,CRITICAL \
             --exit-code 1 \
             --format json \

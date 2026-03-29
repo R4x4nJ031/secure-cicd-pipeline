@@ -1,0 +1,4 @@
+# Temporarily accepted after triage:
+# - Debian base-image libc6 finding with no fixed package version available in the current channel
+# - documented in docs/container-vulnerability-triage.md
+CVE-2026-0861
