@@ -268,3 +268,32 @@ jobs:
           trap "kill ${PF_PID}" EXIT
           sleep 5
           curl --fail --silent http://127.0.0.1:8080/health
+        
+      - name: Run ZAP baseline scan
+        run: |
+          mkdir -p reports
+          kubectl port-forward -n secure-cicd service/clean-app 8080:80 >/tmp/zap-port-forward.log 2>&1 &
+          PF_PID=$!
+          trap "kill ${PF_PID}" EXIT
+          sleep 5
+          docker run --rm \
+            --network host \
+            -v "${{ github.workspace }}/reports:/zap/wrk/:rw" \
+            -t ghcr.io/zaproxy/zaproxy:stable \
+            zap-baseline.py \
+            -t http://127.0.0.1:8080 \
+            -m 1 \
+            -r zap-report.html \
+            -J zap-report.json \
+            -w zap-report.md \
+            -I
+
+      - name: Upload ZAP reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: zap-baseline-report
+          path: |
+            reports/zap-report.html
+            reports/zap-report.json
+            reports/zap-report.md
