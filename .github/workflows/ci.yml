@@ -278,7 +278,6 @@ jobs:
           sleep 5
           docker run --rm \
             --user "$(id -u):$(id -g)" \
-            --network host \
             -v "${{ github.workspace }}/reports:/zap/wrk/:rw" \
             -t ghcr.io/zaproxy/zaproxy:stable \
             zap-baseline.py \
