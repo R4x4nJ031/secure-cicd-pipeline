@@ -221,3 +221,50 @@ jobs:
         with:
           name: trivy-clean-app-report
           path: reports/trivy-clean-app.json
+
+  deploy-staging:
+    runs-on: ubuntu-latest
+    needs: build-and-scan-image
+    permissions:
+      contents: read
+      packages: read
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set staging image reference
+        run: |
+          echo "IMAGE_REF=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}" >> "$GITHUB_ENV"
+
+      - name: Install kubectl
+        run: |
+          curl -fsSL -o /tmp/kubectl https://dl.k8s.io/release/v1.34.0/bin/linux/amd64/kubectl
+          install -m 0755 /tmp/kubectl /usr/local/bin/kubectl
+
+      - name: Install kind
+        run: |
+          curl -fsSL -o /tmp/kind https://kind.sigs.k8s.io/dl/v0.30.0/kind-linux-amd64
+          install -m 0755 /tmp/kind /usr/local/bin/kind
+
+      - name: Create staging kind cluster
+        run: kind create cluster --name secure-cicd-staging
+
+      - name: Deploy app to staging
+        run: |
+          kubectl kustomize k8s/overlays/staging \
+            | sed "s#ghcr.io/r4x4nj031/secure-cicd-pipeline/clean-app:main#${IMAGE_REF}#g" \
+            | kubectl apply -f -
+
+      - name: Verify staging rollout
+        run: |
+          kubectl rollout status deployment/clean-app -n secure-cicd --timeout=180s
+          kubectl get deployment,po,svc -n secure-cicd -o wide
+
+      - name: Smoke test staging service
+        run: |
+          kubectl port-forward -n secure-cicd service/clean-app 8080:80 >/tmp/port-forward.log 2>&1 &
+          PF_PID=$!
+          trap "kill ${PF_PID}" EXIT
+          sleep 5
+          curl --fail --silent http://127.0.0.1:8080/health
