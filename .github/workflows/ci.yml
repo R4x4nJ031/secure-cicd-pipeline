@@ -149,15 +149,19 @@ jobs:
       - name: Set image reference
         run: |
           echo "IMAGE_REF=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}" >> "$GITHUB_ENV"
+          echo "IMAGE_REF_MAIN=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:main" >> "$GITHUB_ENV"
 
       - name: Build clean app image
         run: |
           docker build \
             -t "${IMAGE_REF}" \
+            -t "${IMAGE_REF_MAIN}" \
             ./apps/clean-app
 
       - name: Push clean app image
-        run: docker push "${IMAGE_REF}"
+        run: |
+          docker push "${IMAGE_REF}"
+          docker push "${IMAGE_REF_MAIN}"
 
       - name: Resolve image digest
         run: |
