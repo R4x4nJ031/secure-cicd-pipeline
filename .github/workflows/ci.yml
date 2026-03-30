@@ -281,7 +281,8 @@ jobs:
             --network host \
             -v "${{ github.workspace }}/reports:/zap/wrk/:rw" \
             -t ghcr.io/zaproxy/zaproxy:stable \
-            zap-baseline.py \
+            python3 /zap/zap-baseline.py \
+            --autooff \
             -t http://127.0.0.1:8080 \
             -m 1 \
             -T 5 \
