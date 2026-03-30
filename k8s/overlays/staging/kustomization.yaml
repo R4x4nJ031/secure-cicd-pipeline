@@ -8,3 +8,12 @@ images:
   - name: clean-app
     newName: ghcr.io/r4x4nj031/secure-cicd-pipeline/clean-app
     newTag: main
+
+patches:
+  - target:
+      kind: Deployment
+      name: clean-app
+    patch: |-
+      - op: replace
+        path: /spec/template/spec/containers/0/imagePullPolicy
+        value: Always
