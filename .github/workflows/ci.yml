@@ -272,12 +272,12 @@ jobs:
       - name: Run ZAP baseline scan
         run: |
           mkdir -p reports
+          chmod 777 reports
           kubectl port-forward -n secure-cicd service/clean-app 8080:80 >/tmp/zap-port-forward.log 2>&1 &
           PF_PID=$!
           trap "kill ${PF_PID}" EXIT
           sleep 10
           docker run --rm \
-            --user "$(id -u):$(id -g)" \
             --network host \
             -v "${{ github.workspace }}/reports:/zap/wrk/:rw" \
             -t ghcr.io/zaproxy/zaproxy:stable \
