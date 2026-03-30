@@ -275,19 +275,22 @@ jobs:
           kubectl port-forward -n secure-cicd service/clean-app 8080:80 >/tmp/zap-port-forward.log 2>&1 &
           PF_PID=$!
           trap "kill ${PF_PID}" EXIT
-          sleep 5
+          sleep 10
           docker run --rm \
             --user "$(id -u):$(id -g)" \
+            --network host \
             -v "${{ github.workspace }}/reports:/zap/wrk/:rw" \
             -t ghcr.io/zaproxy/zaproxy:stable \
             zap-baseline.py \
-            --autooff \
             -t http://127.0.0.1:8080 \
             -m 1 \
+            -T 5 \
+            -D 10 \
             -r zap-report.html \
             -J zap-report.json \
             -w zap-report.md \
-            -I
+            -I \
+            -d
 
       - name: Upload ZAP reports
         if: always()
