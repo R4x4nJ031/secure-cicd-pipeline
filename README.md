@@ -1,6 +1,6 @@
 # Secure CI/CD Pipeline
 
-A Product Security and DevSecOps portfolio project that demonstrates a secure software delivery pipeline end to end.
+This project demonstrates a secure software delivery pipeline end to end.
 
 This repository shows how to:
 
@@ -251,12 +251,6 @@ The production environment is protected with GitHub Environments so release prom
 This screenshot shows a controlled failure used to demonstrate that the pipeline blocks insecure artifacts during the `build-and-scan-image` stage.
 
 ![Failed security gate](images/failed.png)
-
-## Interview Summary
-
-You can summarize this project like this:
-
-> I built a secure CI/CD pipeline in GitHub Actions that enforces secrets scanning, SAST, dependency auditing, SBOM generation, container image scanning, keyless artifact signing, Kubernetes staging deployment, DAST with ZAP, OPA policy gates, and protected production promotion.
 
 ## Future Improvements
 
