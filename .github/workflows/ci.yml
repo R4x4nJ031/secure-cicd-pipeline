@@ -271,6 +271,7 @@ jobs:
         
       - name: Run ZAP baseline scan
         run: |
+          set -o pipefail
           mkdir -p reports
           chmod 777 reports
           kubectl port-forward -n secure-cicd service/clean-app 8080:80 >/tmp/zap-port-forward.log 2>&1 &
@@ -291,7 +292,7 @@ jobs:
             -J zap-report.json \
             -w zap-report.md \
             -I \
-            -d
+            -d | tee reports/zap-console.log
 
       - name: Upload ZAP reports
         if: always()
@@ -302,3 +303,65 @@ jobs:
             reports/zap-report.html
             reports/zap-report.json
             reports/zap-report.md
+            reports/zap-console.log
+
+  policy-gate:
+    runs-on: ubuntu-latest
+    needs: deploy-staging
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Download SBOM artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: sbom-clean-app
+          path: artifacts/sbom
+
+      - name: Download Trivy artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: trivy-clean-app-report
+          path: artifacts/trivy
+
+      - name: Download ZAP artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: zap-baseline-report
+          path: artifacts/zap
+
+      - name: Build normalized policy input
+        run: |
+          chmod +x scripts/build-policy-input.sh
+          scripts/build-policy-input.sh reports/security-summary.json
+          jq . reports/security-summary.json
+
+      - name: Install OPA
+        run: |
+          curl -fsSL -o /tmp/opa https://openpolicyagent.org/downloads/latest/opa_linux_amd64_static
+          install -m 0755 /tmp/opa /usr/local/bin/opa
+
+      - name: Evaluate release policy
+        run: |
+          mkdir -p reports
+          opa eval \
+            --format pretty \
+            --data policies/release.rego \
+            --input reports/security-summary.json \
+            'data.release.deny' | tee reports/policy-deny.txt
+
+          opa eval \
+            --fail-defined \
+            --data policies/release.rego \
+            --input reports/security-summary.json \
+            'data.release.deny[_]'
+
+      - name: Upload policy reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: policy-gate-report
+          path: |
+            reports/security-summary.json
+            reports/policy-deny.txt
