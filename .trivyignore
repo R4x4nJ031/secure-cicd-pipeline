@@ -2,3 +2,6 @@
 # - Debian base-image libc6 finding with no fixed package version available in the current channel
 # - documented in docs/container-vulnerability-triage.md
 CVE-2026-0861
+# Follow-up Debian base-image libc6 finding after later Trivy DB refresh
+# - no fixed package version was reported in the scan output at triage time
+CVE-2026-4046
