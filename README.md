@@ -227,6 +227,31 @@ This project includes a documented example of container vulnerability triage:
 
 It records how base-image vulnerabilities surfaced in `Trivy`, how the runtime image was hardened, and how narrowly scoped temporary exceptions were documented rather than weakening the entire security gate.
 
+## Workflow Evidence
+
+### Successful full pipeline
+
+The end-to-end pipeline completes with:
+
+- security checks passing
+- staging deployment succeeding
+- policy gate approval
+- protected production promotion
+
+![Successful workflow](images/successful.png)
+
+### Production approval gate
+
+The production environment is protected with GitHub Environments so release promotion can require explicit approval before execution.
+
+![Production approval gate](images/request.png)
+
+### Intentional failed security gate
+
+This screenshot shows a controlled failure used to demonstrate that the pipeline blocks insecure artifacts during the `build-and-scan-image` stage.
+
+![Failed security gate](images/failed.png)
+
 ## Interview Summary
 
 You can summarize this project like this:
